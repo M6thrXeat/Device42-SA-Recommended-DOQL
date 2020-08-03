@@ -6,6 +6,7 @@ ds.discoveryscores_pk "Discovery Score ID",
 vsd.vserverdiscovery_pk "Job ID",
 vsd.job_name "Job Name",
 vsd.platform "Platform",
+rc.name "Remote Collector",
 ds.port "TCP Port",
 ds.discovery_server "Discovery Target",
 ds.username "Username",
@@ -388,5 +389,6 @@ from view_discoveryscores_v1 ds
 left join view_device_v1 d on d.device_pk = ds.device_fk
 left join view_jobscore_v1 js on ds.jobscore_fk = js.jobscore_pk
 left join view_vserverdiscovery_v1 vsd on js.vserverdiscovery_fk = vsd.vserverdiscovery_pk
+left join view_remotecollector_v1 rc on rc.remotecollector_pk = vsd.remotecollector_fk
 where vsd.platform <> 'vmware' and ds.updated > current_date - 14 and (js.jobscore_pk in (select max(jobscore_pk) from view_jobscore_v1 jk group by jk.vserverdiscovery_fk))
 order by ds.updated DESC
