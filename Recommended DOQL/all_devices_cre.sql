@@ -1,0 +1,22 @@
+SELECT
+cre.device_name "Device",
+cre.vendor "Vendor",
+cre.monthly_ondemand_cost "Monthly On-Demand Cost",
+cre.monthly_1yr_resvd_noupfront_cost "Monthly 1-Year Reserved No Upfront Cost",
+cre.monthly_1yr_resvd_partupfront_cost "Monthly 1-Year Reserved Partial Upfront Cost",
+cre.monthly_1yr_resvd_allupfront_cost "Monthly 1-Year Reserved All Upfront Cost",
+cre.monthly_prorated_3yr_resvd_noupfront_cost "Monthly (prorated) 3-Year Reserved No Upfront Cost",
+cre.monthly_prorated_3yr_resvd_partupfront_cost "Monthly (prorated) 3-Year Reserved Partial Upfront Cost",
+cre.monthly_prorated_3yr_resvd_allupfront_cost "Monthly (prorated) 3-Year Reserved All Upfront Cost",
+cre.yearly_ondemand_cost "Yearly On-Demand Cost",
+cre.yearly_1yr_resvd_noupfront_cost "Yearly 1-Year Reserved No Upfront Cost",
+cre.yearly_1yr_resvd_partupfront_cost "Yearly 1-Year Reserved Partial Upfront Cost",
+cre.yearly_1yr_resvd_allupfront_cost "Yearly 1-Year Reserved All Upfront Cost",
+cre.yearly_prorated_3yr_resvd_noupfront_cost "Yearly (prorated) 3-Year Reserved No Upfront Cost",
+cre.yearly_prorated_3yr_resvd_partupfront_cost "Yearly (prorated) 3-Year Reserved Partial Upfront Cost",
+cre.yearly_prorated_3yr_resvd_allupfront_cost "Yearly (prorated) 3-Year Reserved All Upfront Cost",
+cre.monthly_networking_cost "Monthly Networking Cost",
+cre.yearly_networking_cost "Yearly Networking Cost",
+cre.monthly_storage_cost "Monthly Storage Cost",
+cre.yearly_storage_cost "Yearly Storage Cost"
+from view_credata_v2 cre
