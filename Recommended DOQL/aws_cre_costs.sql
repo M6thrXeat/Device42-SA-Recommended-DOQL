@@ -21,4 +21,4 @@ round(sum((select cre.monthly_storage_cost where cre.vendor = 'AWS'))::numeric, 
 round(sum((select cre.yearly_storage_cost where cre.vendor = 'AWS'))::numeric, 2) "Yearly Storage Cost"
 from view_credata_v2 cre
     join view_device_v1 a on a.device_pk = cre.device_fk
-    left join view_mountpoint_v1 c on c.device_fk = a.device_pk where c.capacity>1
+    left join view_mountpoint_v1 c on c.device_fk = a.device_pk where c.capacity>0
