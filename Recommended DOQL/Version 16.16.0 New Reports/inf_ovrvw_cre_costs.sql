@@ -3,17 +3,10 @@
  
 */
 With 
-    target_mountpoint_data  as (
-    Select Distinct        
-        dev.device_pk,
-        (Select count(*) From view_device_v1) "Total Devices",
-        round(((select sum(m.capacity-m.free_capacity)/1024 from view_mountpoint_v1 m where m.device_fk = dev.device_pk and m.fstype_name <> 'nfs' and m.fstype_name <> 'nfs4' and m.filesystem not like '\\\\%')) , 2)"Used Space"
-    From view_device_v1 dev
-     Group by dev.device_pk
-    ),
     target_cre_data  as (
-    SELECT
-        cre.device_fk,
+    SELECT Distinct
+        /* count (Distinct cre.device_fk) Group by cre.device_fk AS cre_device_count,
+        */
         cre.vendor "Vendor",
         round(sum(cre.monthly_ondemand_cost) over(partition by cre.vendor), 2) "Monthly On-Demand Cost",
         round(sum(cre.monthly_1yr_resvd_noupfront_cost ) over(partition by cre.vendor), 2)  "Monthly 1-Year Reserved No Upfront Cost",
@@ -33,12 +26,35 @@ With
         round(sum(cre.yearly_networking_cost )over(partition by cre.vendor), 2)  "Yearly Networking Cost",
         round(sum(cre.monthly_storage_cost )over(partition by cre.vendor), 2)  "Monthly Storage Cost",
         round(sum(cre.yearly_storage_cost )over(partition by cre.vendor), 2)  "Yearly Storage Cost"
-            /*  on tmd.device_pk = cre.device_fk */
-            From view_credata_v2 cre 
+    From view_credata_v2 cre 
+    ),
+/* Get the unique device count from the CRE data  */    
+    target_count_cre_data  as (
+    SELECT
+        count (Distinct cre.device_fk) device_count
+    From view_credata_v2 cre 
+    ),
+/* Get the unique device_fk keys  */        
+    target_unique_cre_data  as (
+    SELECT Distinct
+        cre.device_fk
+    From view_credata_v2 cre
+    ),
+/* Get the mountpoint info from device records  */      
+    target_mountpoint_data  as (
+    Select Distinct        
+        round(((select sum(m.capacity-m.free_capacity)/1024 
+    From view_mountpoint_v1 m 
+    Join target_unique_cre_data tucd   
+      ON m.device_fk = tucd.device_fk 
+    Where
+        m.fstype_name <> 'nfs' and 
+        m.fstype_name <> 'nfs4' and 
+        m.filesystem not like '\\\\%')) , 2)"Used Space"
     )
 /* Put the data back together  */   
     Select 
-            tmd."Total Devices"
+            tccd.device_count "Total Devices"
             ,tmd."Used Space"
             ,tcd."Vendor"
             ,tcd."Monthly On-Demand Cost"
@@ -59,5 +75,4 @@ With
             ,tcd."Yearly Networking Cost"
             ,tcd."Monthly Storage Cost"
             ,tcd."Yearly Storage Cost"
-        From target_mountpoint_data tmd
-        Join target_cre_data tcd on tcd.device_fk = tmd.device_pk 
+        From target_cre_data tcd, target_count_cre_data tccd, target_mountpoint_data tmd
