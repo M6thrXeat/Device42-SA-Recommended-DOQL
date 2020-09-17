@@ -7,6 +7,8 @@
     2020-09-15 - Updated to correct a few issues:
     - Used the avg/max functions vs the sum on many of the data reporting
     - corrected the ram calculations to figure out if data is in mb or gb
+    - only look at non-network devices
+    - remove the filtering of devices that have a job scan. (want to see all devices that have not been scan)
     - used CTEs and simplified the grouping
 */
 With 
@@ -33,6 +35,7 @@ With
             END "In Service?"
         From 
             view_device_v1 d
+        Where Not network_device    
         Order by d.name 
     ),
  /* Pull the RU data and get the desired values  */ 
@@ -87,12 +90,12 @@ With
     )
     /*  Now pull all the data together  */
 Select
-    ds.updated "Last Attempted Discovery"
+    tdd."Last Successful Discovery"
+    ,ds.updated "Last Attempted Discovery"
     ,(Select max(scl.last_detected) From view_servicecommunication_v2 scl Where tdd.device_pk = scl.listener_device_fk) "Last Detected Comms (Listener)"
     ,(Select max(scc.last_detected) From view_servicecommunication_v2 scc Where tdd.device_pk = scc.client_device_fk) "Last Detected Comms (Client)"
     ,(Select max(siu.install_date) From view_softwareinuse_v1 siu Where tdd.device_pk = siu.device_fk) "Last Software Installation"
     ,tdd.device_pk
-    ,tdd."Last Successful Discovery"
     ,tdd."Device Name"
     ,tdd."Virtual Subtype"
     ,tdd."OS Name"
@@ -147,11 +150,13 @@ Select
 From
     target_device_data tdd
     Left Join target_ru_data trd on trd.device_pk = tdd.device_pk
-    Join view_discoveryscores_v1 ds on ds.device_fk = tdd.device_pk and
+    Left Join view_discoveryscores_v1 ds on ds.device_fk = tdd.device_pk and
                                        ds.added = (Select max(lds.added) From view_discoveryscores_v1 lds Where lds.device_fk = tdd.device_pk)  
-    Join view_jobscore_v1 js on ds.jobscore_fk = js.jobscore_pk and
+    Left Join view_jobscore_v1 js on ds.jobscore_fk = js.jobscore_pk and
                                 js.jobscore_pk = (Select max(ljs.jobscore_pk) From view_jobscore_v1 ljs Where ljs.jobscore_pk = ds.jobscore_fk)
-    Join view_devicelastlogin_v1 l on l.device_fk = tdd.device_pk and 
+    Left Join view_devicelastlogin_v1 l on l.device_fk = tdd.device_pk and 
                                       l.last_login = (Select max(lr.last_login) From view_devicelastlogin_v1 lr Where lr.device_fk = tdd.device_pk)   
-Where 
-    js.jobscore_pk in (Select max(jobscore_pk) From view_jobscore_v1 jk Group by jk.vserverdiscovery_fk) 
+/* Removed the where clause because it was filtering out devices that had not been scan recently (> 7 days)
+ Where 
+    js.jobscore_pk in (Select max(jobscore_pk) From view_jobscore_v1 jk Group by jk.vserverdiscovery_fk) */  
+Order by tdd."Last Successful Discovery" ASC, "Last Attempted Discovery" ASC, tdd."Device Name" ASC   
