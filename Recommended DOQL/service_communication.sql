@@ -28,17 +28,23 @@ With
 Select
     ldev."Device" "Listener Device"
     ,ldev."Affinity Group" "Listener Affinity Group"
-    ,ldev."Business App" "Listener Business App"  -- Can comment out this row if you do not want Business App in Rpt
-    ,ldev."Object Category" "Listener Object Category"  -- Can comment out this row if you do not want Object Category in Rpt
+    ,ldev."Business App" "Listener Business App"  /* Can comment out this row if you do not want Business App in Rpt  */
+    ,ldev."Object Category" "Listener Object Category"  /* Can comment out this row if you do not want Object Category in Rpt */
     ,sc.listener_ip "Listening IP"
     ,lp.port "Listening Port"
     ,s.displayname "Listening Service"
     ,sc.port "Port Communication"
-    ,sc.protocol "Protocol"
+	,CASE
+		WHEN sc.protocol  = '6'
+			THEN 'TCP'
+		WHEN sc.protocol  = '17'
+			THEN 'UDP'
+		ELSE ''
+	END "Protocol"
     ,cdev."Device" "Client Device"
-    ,cdev."Affinity Group" "Client Affinity Group"   -- Can comment out this row if you do not want Affinity Grp in Rpt
-    ,cdev."Business App" "Client Business App"   -- Can comment out this row if you do not want Business App in Rpt
-    ,cdev."Object Category" "Client Object Category"    -- Can comment out this row if you do not want Object Category in Rpt
+    ,cdev."Affinity Group" "Client Affinity Group"   /* Can comment out this row if you do not want Affinity Grp in Rpt  */
+    ,cdev."Business App" "Client Business App"   /* Can comment out this row if you do not want Business App in Rpt */
+    ,cdev."Object Category" "Client Object Category"    /* Can comment out this row if you do not want Object Category in Rpt  */
     ,sc.client_ip "Client IP"
     ,sc.port "Client Port Communication"
     ,sc.client_process_display_name "Process Display Name"
