@@ -27,6 +27,7 @@ With
  /*Pull all the data together for the report  */        
 Select
     ldev."Device" "Listener Device"
+    ,ac.name "App Comp"
     ,ldev."Affinity Group" "Listener Affinity Group"
     ,ldev."Business App" "Listener Business App"  /* Can comment out this row if you do not want Business App in Rpt  */
     ,ldev."Object Category" "Listener Object Category"  /* Can comment out this row if you do not want Object Category in Rpt */
@@ -61,5 +62,7 @@ From
     Join view_servicelistenerport_v2 lp On lp.servicelistenerport_pk = sc.servicelistenerport_fk
     Join view_serviceinstance_v2 si On si.serviceinstance_pk = lp.discovered_serviceinstance_fk
     Join view_service_v2 s On s.service_pk = si.service_fk
+    left join view_serviceinstance_appcomp_v2 sia on sia.serviceinstance_fk = si.serviceinstance_pk
+    left join view_appcomp_v1 ac on ac.appcomp_pk = sia.appcomp_fk
     Left Join target_device_data cdev On cdev.device_pk = sc.client_device_fk
 Where sc.client_ip != '127.0.0.1' and sc.client_ip != '::1'
