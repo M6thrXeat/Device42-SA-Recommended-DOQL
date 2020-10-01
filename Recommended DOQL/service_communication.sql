@@ -27,7 +27,7 @@ With
  /*Pull all the data together for the report  */        
 Select
     ldev."Device" "Listener Device"
-    ,ac.name "App Comp"
+    ,ac.name "Listener App Comp"
     ,ldev."Affinity Group" "Listener Affinity Group"
     ,ldev."Business App" "Listener Business App"  /* Can comment out this row if you do not want Business App in Rpt  */
     ,ldev."Object Category" "Listener Object Category"  /* Can comment out this row if you do not want Object Category in Rpt */
