@@ -78,4 +78,3 @@ From
     Left Join view_appcomp_v1 acc on acc.appcomp_pk = siac.appcomp_fk	
     Left Join target_device_data cdev On cdev.device_pk = sc.client_device_fk
 Where sc.client_ip != '127.0.0.1' and sc.client_ip != '::1' 
-	and  lower(s.displayname) Not in ('undiscovered listening services', 'system')
