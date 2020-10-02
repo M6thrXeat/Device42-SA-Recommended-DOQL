@@ -1,9 +1,11 @@
 /*
 Query for all discovered connections to service instances.
-  - Update 9/16/2020
-  - Add affinity group to the client as well as the listener
+  - Update 10/1/2020
+  - Add affinity group to listener and client 
   - Add Business Apps to listener and client
   - Add device obj category to listener and client
+  - Add App Components to listener and client Service Instance
+  - Add Service End User to listener and client Service Instance
 */
 /* Get all the Device info required for this report once.  */
 With 
@@ -25,7 +27,7 @@ With
         Left Join view_businessapplication_v1 ba on ba.businessapplication_pk = bae.businessapplication_fk
     )
  /*Pull all the data together for the report  */        
-Select
+Select Distinct
     ldev."Device" "Listener Device"
     ,ac.name "Listener App Comp"
     ,ldev."Affinity Group" "Listener Affinity Group"
@@ -34,6 +36,7 @@ Select
     ,sc.listener_ip "Listening IP"
     ,lp.port "Listening Port"
     ,s.displayname "Listening Service"
+	,eu.name "Listener Service User"
     ,sc.port "Port Communication"
 	,CASE
 		WHEN sc.protocol  = '6'
@@ -42,6 +45,9 @@ Select
 			THEN 'UDP'
 		ELSE ''
 	END "Protocol"
+    ,scl.displayname "Client Service"
+	,euc.name "Client Service User"
+    ,acc.name "Client App Comp"	
     ,cdev."Device" "Client Device"
     ,cdev."Affinity Group" "Client Affinity Group"   /* Can comment out this row if you do not want Affinity Grp in Rpt  */
     ,cdev."Business App" "Client Business App"   /* Can comment out this row if you do not want Business App in Rpt */
@@ -62,7 +68,14 @@ From
     Join view_servicelistenerport_v2 lp On lp.servicelistenerport_pk = sc.servicelistenerport_fk
     Join view_serviceinstance_v2 si On si.serviceinstance_pk = lp.discovered_serviceinstance_fk
     Join view_service_v2 s On s.service_pk = si.service_fk
-    left join view_serviceinstance_appcomp_v2 sia on sia.serviceinstance_fk = si.serviceinstance_pk
-    left join view_appcomp_v1 ac on ac.appcomp_pk = sia.appcomp_fk
+    Left Join view_serviceinstance_v2 sic On sic.serviceinstance_pk = sc.client_service_fk
+    Left Join view_service_v2 scl On scl.service_pk = sic.service_fk
+	Left Join view_enduser_v1 euc On euc.enduser_pk = sic.enduser_fk	
+	Left Join view_enduser_v1 eu On eu.enduser_pk = si.enduser_fk
+    Left Join view_serviceinstance_appcomp_v2 sia on sia.serviceinstance_fk = si.serviceinstance_pk
+    Left Join view_appcomp_v1 ac on ac.appcomp_pk = sia.appcomp_fk
+    Left Join view_serviceinstance_appcomp_v2 siac on siac.serviceinstance_fk = sic.serviceinstance_pk
+    Left Join view_appcomp_v1 acc on acc.appcomp_pk = siac.appcomp_fk	
     Left Join target_device_data cdev On cdev.device_pk = sc.client_device_fk
-Where sc.client_ip != '127.0.0.1' and sc.client_ip != '::1'
+Where sc.client_ip != '127.0.0.1' and sc.client_ip != '::1' 
+	and  lower(s.displayname) Not in ('undiscovered listening services', 'system')
